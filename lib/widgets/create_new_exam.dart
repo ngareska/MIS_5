@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mis_lab3/model/exam.dart';
 import 'package:nanoid/nanoid.dart';
@@ -14,20 +13,27 @@ class createNewExam extends StatefulWidget {
 class _createNewExamState extends State<createNewExam> {
   final _nameController = TextEditingController();
   final _dateController = TextEditingController();
-  final _timeController = TextEditingController();
 
   void _submitData() {
-    if (_nameController.text.isEmpty ||
-        _dateController.text.isEmpty ||
-        _timeController.text.isEmpty) {
+    if (_nameController.text.isEmpty || _dateController.text.isEmpty) {
       return;
     }
+
+    int check1 = '-'.allMatches(_dateController.text).length;
+    int check2 = ':'.allMatches(_dateController.text).length;
+
+    if (_dateController.text.length < 16 || check1 != 2 || check2 != 1) {
+      print("Please enter date in the right format!");
+      return;
+    }
+
+    final String stringDate = '${_dateController.text}:00';
+    DateTime date = DateTime.parse(stringDate);
 
     final newExam = Exam(
       id: nanoid(5),
       name: _nameController.text,
-      date: _dateController.text,
-      time: _timeController.text,
+      date: date,
     );
     widget.addExam(newExam);
     Navigator.of(context).pop();
@@ -36,22 +42,17 @@ class _createNewExamState extends State<createNewExam> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(13),
+        padding: const EdgeInsets.all(13),
         child: Column(
           children: [
             TextField(
-              decoration: InputDecoration(labelText: "Subject name"),
+              decoration:const InputDecoration(labelText: "Subject name"),
               controller: _nameController,
               onSubmitted: (_) => _submitData(),
             ),
             TextField(
-              decoration: InputDecoration(labelText: "Date"),
+              decoration:const InputDecoration(labelText: "Date"),
               controller: _dateController,
-              onSubmitted: (_) => _submitData(),
-            ),
-            TextField(
-              decoration: InputDecoration(labelText: "Time"),
-              controller: _timeController,
               onSubmitted: (_) => _submitData(),
             ),
           ],
