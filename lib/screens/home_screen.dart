@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mis_lab3/model/exam.dart';
+import 'package:mis_lab3/model/location.dart';
 import 'package:mis_lab3/screens/calendar_screen.dart';
+import 'package:mis_lab3/screens/google_map_screen.dart';
 import 'package:mis_lab3/screens/login_screen.dart';
 import 'package:mis_lab3/services/notification_service.dart';
 import 'package:mis_lab3/widgets/create_new_exam.dart';
@@ -26,26 +29,26 @@ class HomeScreenState extends State<HomeScreen> {
 
   final List<Exam> _exams = [
     Exam(
-      id: "s1",
-      name: "Mobile information systems",
-      date: DateTime.parse(
-        "2023-10-12 10:00:00",
-      ),
-    ),
+        id: "s1",
+        name: "Mobile information systems",
+        date: DateTime.parse(
+          "2023-10-12 10:00:00",
+        ),
+        location: Location(latitude: 42.0043165, longitude: 21.4096452)),
     Exam(
-      id: "s2",
-      name: "Databases",
-      date: DateTime.parse(
-        "2023-08-31 15:00:00",
-      ),
-    ),
+        id: "s2",
+        name: "Databases",
+        date: DateTime.parse(
+          "2023-08-31 15:00:00",
+        ),
+        location: Location(latitude: 42.004400, longitude: 21.408918)),
     Exam(
-      id: "s3",
-      name: "Design of human-computer interaction",
-      date: DateTime.parse(
-        "2023-02-30 12:00:00",
-      ),
-    )
+        id: "s3",
+        name: "Design of human-computer interaction",
+        date: DateTime.parse(
+          "2023-02-30 12:00:00",
+        ),
+        location: Location(latitude: 42.004906, longitude: 21.409890))
   ];
 
   void _showModal(BuildContext ctx) {
@@ -72,12 +75,22 @@ class HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  String _modifyDate(DateTime date) {
+  String _modifyDate(DateTime date, Location location) {
+    String subjectLocation = '';
+
+    if (location.latitude == 42.0043165 && location.longitude == 21.4096452) {
+      subjectLocation = "FINKI";
+    } else if (location.latitude == 42.004400 &&
+        location.longitude == 21.408918) {
+      subjectLocation = "FEIT";
+    } else {
+      subjectLocation = "TMF";
+    }
     String dateToString = DateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     List<String> dateParts = dateToString.split(" ");
     String modifiedTime = dateParts[1].substring(0, 5);
 
-    return dateParts[0] + ' | ' + modifiedTime + 'h';
+    return dateParts[0] + ' | ' + modifiedTime + 'h | ' + subjectLocation;
   }
 
   Future _logOut() async {
@@ -133,7 +146,8 @@ class HomeScreenState extends State<HomeScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            _modifyDate(_exams[index].date),
+                            _modifyDate(
+                                _exams[index].date, _exams[index].location),
                             style: const TextStyle(color: Colors.grey),
                           ),
                           trailing: IconButton(
@@ -144,21 +158,60 @@ class HomeScreenState extends State<HomeScreen> {
                     },
                   ),
           ),
-          ElevatedButton.icon(
-            icon: const Icon(
-              Icons.calendar_month_outlined,
-              size: 30,
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(5),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.calendar_month_outlined,
+                      size: 30,
+                    ),
+                    label: const Text(
+                      "Calendar",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(10),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CalendarScreen(_exams),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(5),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.map_outlined,
+                      size: 30,
+                    ),
+                    label: const Text(
+                      "Show Map",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(10),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GoogleMapScreen(_exams),
+                        ),
+                      );
+                    },
+                  ),
+                )
+              ],
             ),
-            label: const Text(
-              "Calendar",
-              style: TextStyle(fontSize: 20),
-            ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CalendarScreen(_exams)));
-            },
           ),
           ElevatedButton.icon(
             icon: const Icon(
